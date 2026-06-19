@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agent-eval · travel-assistant-tool-calling</title>
+<style>
+  :root { --ok:#1a7f37; --bad:#cf222e; --warn:#bf8700; --bg:#0d1117; --card:#161b22;
+          --fg:#e6edf3; --muted:#8b949e; --line:#30363d; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;
+         background:var(--bg); color:var(--fg); padding:32px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin-bottom:24px; }
+  .cards { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:28px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px;
+          padding:16px 20px; min-width:150px; }
+  .card .v { font-size:26px; font-weight:600; }
+  .card .l { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  table { width:100%; border-collapse:collapse; background:var(--card);
+          border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  th, td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  tr:last-child td { border-bottom:none; }
+  .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+  .bar { position:relative; height:18px; background:#21262d; border-radius:4px; min-width:120px; }
+  .bar > span { position:absolute; left:0; top:0; bottom:0; border-radius:4px; }
+  .ci { position:absolute; top:50%; height:2px; background:var(--fg); opacity:.7; }
+  .flaky { color:var(--warn); font-weight:600; }
+  .pill { padding:2px 8px; border-radius:999px; font-size:12px; }
+  .pill.ok { background:rgba(26,127,55,.18); color:#3fb950; }
+  .pill.bad { background:rgba(207,34,46,.18); color:#ff7b72; }
+  .pill.warn { background:rgba(191,135,0,.18); color:#e3b341; }
+  footer { color:var(--muted); margin-top:24px; font-size:12px; }
+</style>
+</head>
+<body>
+  <h1>agent-eval — travel-assistant-tool-calling</h1>
+  <div class="sub">
+    model <span class="mono">mock-agent</span> ·
+    temperature 1.0 ·
+    20 reps/case ·
+    95% CI ·
+    2026-06-19T20:03:44
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="v">77.9%</div>
+      <div class="l">Mean reliability</div></div>
+    <div class="card"><div class="v flaky">
+      2/7</div>
+      <div class="l">Flaky cases</div></div>
+    <div class="card"><div class="v">140</div>
+      <div class="l">Total runs</div></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Case</th><th>Status</th><th>Reliability (95% CI)</th>
+          <th>Flake</th><th>pass^k</th><th>Expected tool</th></tr>
+    </thead>
+    <tbody>
+    
+      <tr>
+        <td>
+          <div>weather_simple</div>
+          <div class="sub mono" style="font-size:12px">What&#39;s the weather in Chicago right now?</div>
+        </td>
+        <td>
+          <span class="pill ok">stable pass</span>
+          
+        </td>
+        <td>
+          100.0%
+          <div class="bar">
+            <span style="width:100.0%;
+              background:var(--ok)"></span>
+            <span class="ci" style="left:83.9%;
+              width:16.1%"></span>
+          </div>
+          <div class="sub mono" style="font-size:11px">
+            [84–100%]
+          </div>
+        </td>
+        <td class="">0%</td>
+        <td class="mono" style="font-size:12px">
+          k1=100% · k3=100% · k5=100%
+        </td>
+        <td class="mono">get_weather</td>
+      </tr>
+    
+      <tr>
+        <td>
+          <div>weather_other_city</div>
+          <div class="sub mono" style="font-size:12px">Is it raining in Seattle?</div>
+        </td>
+        <td>
+          <span class="pill ok">stable pass</span>
+          
+        </td>
+        <td>
+          100.0%
+          <div class="bar">
+            <span style="width:100.0%;
+              background:var(--ok)"></span>
+            <span class="ci" style="left:83.9%;
+              width:16.1%"></span>
+          </div>
+          <div class="sub mono" style="font-size:11px">
+            [84–100%]
+          </div>
+        </td>
+        <td class="">0%</td>
+        <td class="mono" style="font-size:12px">
+          k1=100% · k3=100% · k5=100%
+        </td>
+        <td class="mono">get_weather</td>
+      </tr>
+    
+      <tr>
+        <td>
+          <div>flight_search</div>
+          <div class="sub mono" style="font-size:12px">Find me flights from Chicago to New York on 2026-07-04.</div>
+        </td>
+        <td>
+          <span class="pill bad">stable fail</span>
+          
+        </td>
+        <td>
+          0.0%
+          <div class="bar">
+            <span style="width:0.0%;
+              background:var(--bad)"></span>
+            <span class="ci" style="left:0.0%;
+              width:16.1%"></span>
+          </div>
+          <div class="sub mono" style="font-size:11px">
+            [0–16%]
+          </div>
+        </td>
+        <td class="">0%</td>
+        <td class="mono" style="font-size:12px">
+          k1=0% · k3=0% · k5=0%
+        </td>
+        <td class="mono">search_flights</td>
+      </tr>
+    
+      <tr>
+        <td>
+          <div>send_email_simple</div>
+          <div class="sub mono" style="font-size:12px">Email john@example.com to say the trip is confirmed.</div>
+        </td>
+        <td>
+          <span class="pill ok">stable pass</span>
+          
+        </td>
+        <td>
+          100.0%
+          <div class="bar">
+            <span style="width:100.0%;
+              background:var(--ok)"></span>
+            <span class="ci" style="left:83.9%;
+              width:16.1%"></span>
+          </div>
+          <div class="sub mono" style="font-size:11px">
+            [84–100%]
+          </div>
+        </td>
+        <td class="">0%</td>
+        <td class="mono" style="font-size:12px">
+          k1=100% · k3=100% · k5=100%
+        </td>
+        <td class="mono">send_email</td>
+      </tr>
+    
+      <tr>
+        <td>
+          <div>no_tool_chitchat</div>
+          <div class="sub mono" style="font-size:12px">Thanks, that&#39;s all for now!</div>
+        </td>
+        <td>
+          <span class="pill ok">stable pass</span>
+          
+        </td>
+        <td>
+          100.0%
+          <div class="bar">
+            <span style="width:100.0%;
+              background:var(--ok)"></span>
+            <span class="ci" style="left:83.9%;
+              width:16.1%"></span>
+          </div>
+          <div class="sub mono" style="font-size:11px">
+            [84–100%]
+          </div>
+        </td>
+        <td class="">0%</td>
+        <td class="mono" style="font-size:12px">
+          k1=100% · k3=100% · k5=100%
+        </td>
+        <td class="mono">∅ none</td>
+      </tr>
+    
+      <tr>
+        <td>
+          <div>ambiguous_trip_plan</div>
+          <div class="sub mono" style="font-size:12px">Plan my trip to NYC next Friday.</div>
+        </td>
+        <td>
+          <span class="pill warn">flaky</span>
+        </td>
+        <td>
+          75.0%
+          <div class="bar">
+            <span style="width:75.0%;
+              background:var(--warn)"></span>
+            <span class="ci" style="left:53.1%;
+              width:35.7%"></span>
+          </div>
+          <div class="sub mono" style="font-size:11px">
+            [53–89%]
+          </div>
+        </td>
+        <td class="flaky">25%</td>
+        <td class="mono" style="font-size:12px">
+          k1=75% · k3=40% · k5=19%
+        </td>
+        <td class="mono">search_flights</td>
+      </tr>
+    
+      <tr>
+        <td>
+          <div>ambiguous_weather_vs_flight</div>
+          <div class="sub mono" style="font-size:12px">I&#39;m thinking about going to Denver this weekend, what do...</div>
+        </td>
+        <td>
+          <span class="pill warn">flaky</span>
+        </td>
+        <td>
+          70.0%
+          <div class="bar">
+            <span style="width:70.0%;
+              background:var(--warn)"></span>
+            <span class="ci" style="left:48.1%;
+              width:37.3%"></span>
+          </div>
+          <div class="sub mono" style="font-size:11px">
+            [48–85%]
+          </div>
+        </td>
+        <td class="flaky">30%</td>
+        <td class="mono" style="font-size:12px">
+          k1=70% · k3=32% · k5=13%
+        </td>
+        <td class="mono">get_weather</td>
+      </tr>
+    
+    </tbody>
+  </table>
+
+  <footer>
+    Generated by <strong>agent-eval</strong> · reliability = observed pass rate ·
+    flake = % of reps disagreeing with the majority · CI = Wilson score interval ·
+    pass^k = P(all k reps pass).
+  </footer>
+</body>
+</html>

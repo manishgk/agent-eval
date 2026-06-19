@@ -1,0 +1,40 @@
+name: eval
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install dependencies
+        run: poetry install --with dev,dashboard
+
+      - name: Lint (ruff)
+        run: poetry run ruff check .
+
+      - name: Type-check (mypy)
+        run: poetry run mypy
+
+      - name: Test (pytest)
+        run: poetry run pytest -q
+
+      - name: Run offline mock eval + build report
+        run: poetry run python scripts/generate_sample.py
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-eval-report
+          path: reports/sample_report.html

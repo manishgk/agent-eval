@@ -1,0 +1,61 @@
+name: travel-assistant-tool-calling
+description: >
+  Reliability suite for a travel-assistant agent's tool selection. Cases range
+  from unambiguous (should be ~100% reliable) to ambiguous/multi-step (where the
+  agent is expected to be flaky — exactly what we want to surface).
+
+cases:
+  # --- Unambiguous: a healthy agent should hit these every time ---
+  - id: weather_simple
+    prompt: "What's the weather in Chicago right now?"
+    expected_tool: get_weather
+    expected_args:
+      city: Chicago
+    description: Single clear intent, single obvious tool.
+
+  - id: weather_other_city
+    prompt: "Is it raining in Seattle?"
+    expected_tool: get_weather
+    expected_args:
+      city: Seattle
+
+  - id: flight_search
+    prompt: "Find me flights from Chicago to New York on 2026-07-04."
+    expected_tool: search_flights
+    expected_args:
+      origin: Chicago
+      destination: New York
+      date: "2026-07-04"
+
+  - id: send_email_simple
+    prompt: "Email john@example.com to say the trip is confirmed."
+    expected_tool: send_email
+    expected_args:
+      to: john@example.com
+
+  # --- No tool should fire ---
+  - id: no_tool_chitchat
+    prompt: "Thanks, that's all for now!"
+    expected_tool: null
+    description: Conversational close — calling any tool is wrong.
+
+  # --- Ambiguous / multi-step: reliability is expected to drop here ---
+  - id: ambiguous_trip_plan
+    prompt: "Plan my trip to NYC next Friday."
+    expected_tool: search_flights
+    arg_match: subset
+    judge_rubric: >
+      The agent should begin planning by searching flights (origin may be
+      unknown and asked later). Booking a hotel or sending an email first is
+      premature. Pass if the FIRST tool call is a reasonable first planning step
+      (searching flights), fail otherwise.
+    description: Under-specified, multi-step — surfaces flaky first-step choice.
+
+  - id: ambiguous_weather_vs_flight
+    prompt: "I'm thinking about going to Denver this weekend, what do you think?"
+    expected_tool: get_weather
+    arg_match: subset
+    judge_rubric: >
+      Either checking the weather in Denver or searching flights to Denver is a
+      defensible first action. Pass if the agent calls get_weather OR
+      search_flights for Denver; fail on any other tool or no tool.
