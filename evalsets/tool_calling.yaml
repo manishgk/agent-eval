@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./schema/eval_suite.schema.json
 name: travel-assistant-tool-calling
 description: >
   Reliability suite for a travel-assistant agent's tool selection. Cases range
@@ -43,7 +44,6 @@ cases:
   - id: ambiguous_trip_plan
     prompt: "Plan my trip to NYC next Friday."
     expected_tool: search_flights
-    arg_match: subset
     judge_rubric: >
       The agent should begin planning by searching flights (origin may be
       unknown and asked later). Booking a hotel or sending an email first is
@@ -54,7 +54,6 @@ cases:
   - id: ambiguous_weather_vs_flight
     prompt: "I'm thinking about going to Denver this weekend, what do you think?"
     expected_tool: get_weather
-    arg_match: subset
     judge_rubric: >
       Either checking the weather in Denver or searching flights to Denver is a
       defensible first action. Pass if the agent calls get_weather OR

@@ -1,0 +1,109 @@
+{
+  "$defs": {
+    "EvalCase": {
+      "description": "A single expectation about the agent's tool-calling behavior.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "prompt": {
+          "title": "Prompt",
+          "type": "string"
+        },
+        "expected_tool": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Tool"
+        },
+        "expected_args": {
+          "additionalProperties": true,
+          "title": "Expected Args",
+          "type": "object"
+        },
+        "arg_match": {
+          "default": "subset",
+          "enum": [
+            "subset",
+            "exact"
+          ],
+          "title": "Arg Match",
+          "type": "string"
+        },
+        "case_insensitive": {
+          "default": true,
+          "title": "Case Insensitive",
+          "type": "boolean"
+        },
+        "judge_rubric": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Judge Rubric"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        }
+      },
+      "required": [
+        "id",
+        "prompt"
+      ],
+      "title": "EvalCase",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/EvalCase"
+      },
+      "title": "Cases",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name",
+    "cases"
+  ],
+  "title": "EvalSuite",
+  "type": "object"
+}

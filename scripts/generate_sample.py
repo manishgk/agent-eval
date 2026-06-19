@@ -19,19 +19,20 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def main() -> None:
-    suite = load_suite(ROOT / "evalsets" / "tool_calling.yaml")
-    agent = ToolAgent(MockProvider(flakiness=0.3))
-    result = run_suite_sync(agent, suite, reps=20, concurrency=5, judge=None)
-
+    result = run_suite_sync(
+        ToolAgent(MockProvider(flakiness=0.3)),
+        load_suite(ROOT / "evalsets" / "tool_calling.yaml"),
+        reps=20,
+        concurrency=5,
+        judge=None,
+    )
     (ROOT / "results").mkdir(exist_ok=True)
     (ROOT / "reports").mkdir(exist_ok=True)
     (ROOT / "docs").mkdir(exist_ok=True)
     (ROOT / "results" / "sample_run.json").write_text(result.model_dump_json(indent=2))
     (ROOT / "reports" / "sample_report.html").write_text(render_html(result))
     (ROOT / "docs" / "reliability.svg").write_text(render_svg(result))
-    print(
-        "Wrote results/sample_run.json, reports/sample_report.html, and docs/reliability.svg"
-    )
+    print("Wrote results/sample_run.json, reports/sample_report.html, and docs/reliability.svg")
 
 
 if __name__ == "__main__":
