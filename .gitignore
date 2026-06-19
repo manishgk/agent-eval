@@ -17,6 +17,7 @@ results/*.json
 !results/sample_run.json
 reports/*.html
 !reports/sample_report.html
+reports/*.svg
 
 # OS / editor
 .DS_Store
