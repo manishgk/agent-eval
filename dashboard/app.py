@@ -79,7 +79,7 @@ def main() -> None:
         height=420,
         margin=dict(t=20, b=40),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
     st.subheader("Cases")
     st.dataframe(
         [
@@ -94,15 +94,12 @@ def main() -> None:
             }
             for c in cases
         ],
-        use_container_width=True,
+        width='stretch',
         hide_index=True,
     )
     st.subheader("Drill into a case")
-    case = next(
-        c
-        for c in cases
-        if c.case_id == st.selectbox("Case", [c.case_id for c in cases])
-    )
+    selected_case_id = st.selectbox("Case", [c.case_id for c in cases])
+    case = next(c for c in cases if c.case_id == selected_case_id)
     st.write(f"**Prompt:** {case.prompt}")
     st.dataframe(
         [
@@ -119,7 +116,7 @@ def main() -> None:
             }
             for r in case.reps
         ],
-        use_container_width=True,
+        width='stretch',
         hide_index=True,
     )
 
