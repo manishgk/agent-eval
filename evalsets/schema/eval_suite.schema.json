@@ -75,6 +75,7 @@
       "type": "object"
     }
   },
+  "description": "A named collection of eval cases, typically loaded from a YAML file.",
   "properties": {
     "name": {
       "title": "Name",

@@ -26,6 +26,9 @@ from agent_eval.report.models import JudgeVerdict
 
 DEFAULT_JUDGE_MODEL = os.getenv("AGENT_EVAL_JUDGE_MODEL", "claude-opus-4-8")
 
+# A verdict is one tool call (passed/score/reasoning); 512 tokens is ample.
+_JUDGE_MAX_TOKENS = 512
+
 _VERDICT_TOOL: dict[str, Any] = {
     "name": "submit_verdict",
     "description": "Submit your verdict on whether the agent's action satisfies the rubric.",
@@ -82,14 +85,18 @@ class LLMJudge:
             f"Rubric:\n{rubric}\n\n"
             f"Agent action:\n{_format_action(run)}"
         )
-        message = await self._client.messages.create(
-            model=self.model,
-            max_tokens=512,
-            system=_JUDGE_SYSTEM,
-            tools=[_VERDICT_TOOL],  # type: ignore[list-item]
-            tool_choice={"type": "tool", "name": "submit_verdict"},
-            messages=[{"role": "user", "content": prompt}],
-        )
+        # Build kwargs as a dict (mirrors AnthropicProvider) so the SDK's
+        # heavily-overloaded create() signature accepts our plain-dict tool spec
+        # and tool_choice without a blanket type: ignore on the call.
+        create_kwargs: dict[str, Any] = {
+            "model": self.model,
+            "max_tokens": _JUDGE_MAX_TOKENS,
+            "system": _JUDGE_SYSTEM,
+            "tools": [_VERDICT_TOOL],
+            "tool_choice": {"type": "tool", "name": "submit_verdict"},
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        message = await self._client.messages.create(**create_kwargs)
         for block in message.content:
             if block.type == "tool_use" and block.name == "submit_verdict":
                 return JudgeVerdict.model_validate(block.input)

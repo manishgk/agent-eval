@@ -6,9 +6,11 @@ every repetition, and aggregates into reliability statistics. This is where
 """
 
 from __future__ import annotations
+
 import asyncio
 from collections.abc import Callable
 from datetime import UTC, datetime
+
 from agent_eval.agent.tool_agent import AgentRun, ToolAgent
 from agent_eval.eval.assertions import tool_call_matches
 from agent_eval.eval.case import EvalCase, EvalSuite

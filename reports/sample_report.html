@@ -25,6 +25,9 @@
   .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
   .bar { position:relative; height:18px; background:#21262d; border-radius:4px; min-width:120px; }
   .bar > span { position:absolute; left:0; top:0; bottom:0; border-radius:4px; }
+  .bar > span.pass { background:var(--ok); }
+  .bar > span.fail { background:var(--bad); }
+  .bar > span.flaky { background:var(--warn); }
   .ci { position:absolute; top:50%; height:2px; background:var(--fg); opacity:.7; }
   .flaky { color:var(--warn); font-weight:600; }
   .pill { padding:2px 8px; border-radius:999px; font-size:12px; }
@@ -41,7 +44,7 @@
     temperature 1.0 ·
     20 reps/case ·
     95% CI ·
-    2026-06-19T22:44:40
+    2026-06-20T04:59:44
   </div>
 
   <div class="cards">
@@ -73,8 +76,8 @@
         <td>
           100.0%
           <div class="bar">
-            <span style="width:100.0%;
-              background:var(--ok)"></span>
+            <span class="pass"
+              style="width:100.0%"></span>
             <span class="ci" style="left:83.9%;
               width:16.1%"></span>
           </div>
@@ -101,8 +104,8 @@
         <td>
           100.0%
           <div class="bar">
-            <span style="width:100.0%;
-              background:var(--ok)"></span>
+            <span class="pass"
+              style="width:100.0%"></span>
             <span class="ci" style="left:83.9%;
               width:16.1%"></span>
           </div>
@@ -129,8 +132,8 @@
         <td>
           100.0%
           <div class="bar">
-            <span style="width:100.0%;
-              background:var(--ok)"></span>
+            <span class="pass"
+              style="width:100.0%"></span>
             <span class="ci" style="left:83.9%;
               width:16.1%"></span>
           </div>
@@ -157,8 +160,8 @@
         <td>
           100.0%
           <div class="bar">
-            <span style="width:100.0%;
-              background:var(--ok)"></span>
+            <span class="pass"
+              style="width:100.0%"></span>
             <span class="ci" style="left:83.9%;
               width:16.1%"></span>
           </div>
@@ -185,8 +188,8 @@
         <td>
           100.0%
           <div class="bar">
-            <span style="width:100.0%;
-              background:var(--ok)"></span>
+            <span class="pass"
+              style="width:100.0%"></span>
             <span class="ci" style="left:83.9%;
               width:16.1%"></span>
           </div>
@@ -212,8 +215,8 @@
         <td>
           75.0%
           <div class="bar">
-            <span style="width:75.0%;
-              background:var(--warn)"></span>
+            <span class="flaky"
+              style="width:75.0%"></span>
             <span class="ci" style="left:53.1%;
               width:35.7%"></span>
           </div>
@@ -239,8 +242,8 @@
         <td>
           70.0%
           <div class="bar">
-            <span style="width:70.0%;
-              background:var(--warn)"></span>
+            <span class="flaky"
+              style="width:70.0%"></span>
             <span class="ci" style="left:48.1%;
               width:37.3%"></span>
           </div>

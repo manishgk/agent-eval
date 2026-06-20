@@ -33,6 +33,9 @@ _TEMPLATE = """<!doctype html>
   .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
   .bar { position:relative; height:18px; background:#21262d; border-radius:4px; min-width:120px; }
   .bar > span { position:absolute; left:0; top:0; bottom:0; border-radius:4px; }
+  .bar > span.pass { background:var(--ok); }
+  .bar > span.fail { background:var(--bad); }
+  .bar > span.flaky { background:var(--warn); }
   .ci { position:absolute; top:50%; height:2px; background:var(--fg); opacity:.7; }
   .flaky { color:var(--warn); font-weight:600; }
   .pill { padding:2px 8px; border-radius:999px; font-size:12px; }
@@ -75,15 +78,15 @@ _TEMPLATE = """<!doctype html>
           <div class="sub mono" style="font-size:12px">{{ c.prompt | truncate(60) }}</div>
         </td>
         <td>
-          {% if c.reliability == 1.0 %}<span class="pill ok">stable pass</span>
-          {% elif c.reliability == 0.0 %}<span class="pill bad">stable fail</span>
+          {% if c.status == 'pass' %}<span class="pill ok">stable pass</span>
+          {% elif c.status == 'fail' %}<span class="pill bad">stable fail</span>
           {% else %}<span class="pill warn">flaky</span>{% endif %}
         </td>
         <td>
           {{ (c.reliability * 100) | round(1) }}%
           <div class="bar">
-            <span style="width:{{ (c.reliability * 100) | round(1) }}%;
-              background:{{ 'var(--ok)' if c.reliability==1 else ('var(--bad)' if c.reliability==0 else 'var(--warn)') }}"></span>
+            <span class="{{ c.status }}"
+              style="width:{{ (c.reliability * 100) | round(1) }}%"></span>
             <span class="ci" style="left:{{ (c.wilson_low*100)|round(1) }}%;
               width:{{ ((c.wilson_high-c.wilson_low)*100)|round(1) }}%"></span>
           </div>
@@ -93,9 +96,12 @@ _TEMPLATE = """<!doctype html>
         </td>
         <td class="{{ 'flaky' if c.flaky else '' }}">{{ (c.flake_rate*100)|round(0)|int }}%</td>
         <td class="mono" style="font-size:12px">
-          {% for k, v in c.pass_hat_k.items() %}k{{k}}={{ (v*100)|round(0)|int }}%{% if not loop.last %} · {% endif %}{% endfor %}
+          {% for k, v in c.pass_hat_k.items() -%}
+            k{{ k }}={{ (v * 100) | round(0) | int }}%{% if not loop.last %} · {% endif %}
+          {%- endfor %}
         </td>
-        <td class="mono">{{ c.expected_tool or '∅ none' }}{% if c.used_judge %} <span class="pill warn">judge</span>{% endif %}</td>
+        <td class="mono">{{ c.expected_tool or '∅ none'
+          }}{% if c.used_judge %} <span class="pill warn">judge</span>{% endif %}</td>
       </tr>
     {% endfor %}
     </tbody>

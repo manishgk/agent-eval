@@ -50,8 +50,9 @@ def _print_table(result: SuiteResult) -> None:
     table.add_column("95% CI", justify="center")
     table.add_column("Flake", justify="right")
     table.add_column("pass^k", justify="left")
+    styles = {"pass": "green", "fail": "red", "flaky": "yellow"}
     for c in result.cases:
-        style = "green" if c.reliability == 1 else ("red" if c.reliability == 0 else "yellow")
+        style = styles[c.status]
         ci = f"[{c.wilson_low * 100:.0f}–{c.wilson_high * 100:.0f}%]"
         pk = " ".join(f"k{k}={v * 100:.0f}%" for k, v in c.pass_hat_k.items())
         table.add_row(

@@ -36,12 +36,11 @@ _BAR_X = _PAD + _LABEL_W
 _FOOTER_H = 34
 
 
+_STATUS_COLORS = {"pass": _OK, "fail": _BAD, "flaky": _WARN}
+
+
 def _bar_color(c: CaseResult) -> str:
-    if c.reliability >= 1.0:
-        return _OK
-    if c.reliability <= 0.0:
-        return _BAD
-    return _WARN
+    return _STATUS_COLORS[c.status]
 
 
 def _x(frac: float, bar_w: float) -> float:

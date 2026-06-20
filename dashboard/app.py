@@ -10,11 +10,14 @@ and lets you drill into individual repetitions.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import plotly.graph_objects as go
 import streamlit as st
 
 from agent_eval.report.models import SuiteResult
+
+_STATUS_COLORS = {"pass": "#1a7f37", "fail": "#cf222e", "flaky": "#bf8700"}
 
 
 def _list_runs() -> list[Path]:
@@ -26,7 +29,7 @@ def _list_runs() -> list[Path]:
 
 
 @st.cache_data(show_spinner=False)
-def _load(path_str: str) -> dict:
+def _load(path_str: str) -> dict[str, Any]:
     text = Path(path_str).read_text(encoding="utf-8")
     return SuiteResult.model_validate_json(text).model_dump()
 
@@ -57,14 +60,7 @@ def main() -> None:
     fig.add_bar(
         x=[c.case_id for c in cases],
         y=[c.reliability * 100 for c in cases],
-        marker_color=[
-            (
-                "#1a7f37"
-                if c.reliability == 1
-                else "#cf222e" if c.reliability == 0 else "#bf8700"
-            )
-            for c in cases
-        ],
+        marker_color=[_STATUS_COLORS[c.status] for c in cases],
         error_y={
             "type": "data",
             "symmetric": False,
@@ -77,7 +73,7 @@ def main() -> None:
         yaxis_title="Reliability % (95% Wilson CI)",
         yaxis_range=[0, 105],
         height=420,
-        margin=dict(t=20, b=40),
+        margin={"t": 20, "b": 40},
     )
     st.plotly_chart(fig, width='stretch')
     st.subheader("Cases")

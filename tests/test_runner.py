@@ -65,9 +65,9 @@ def test_run_case_computes_reliability(case: EvalCase) -> None:
     )
     assert result.n == 10
     assert result.successes == 7
-    assert result.reliability == 0.7
+    assert result.reliability == pytest.approx(0.7)
     assert result.flaky is True
-    assert result.flake_rate == 0.3
+    assert result.flake_rate == pytest.approx(0.3)
     assert result.wilson_low < 0.7 < result.wilson_high
 
 
@@ -82,7 +82,7 @@ def test_run_suite_aggregates(case: EvalCase) -> None:
         )
     )
     assert len(result.cases) == 1
-    assert result.mean_reliability == 1.0
+    assert result.mean_reliability == pytest.approx(1.0)
     assert result.flaky_cases == []
     assert result.total_reps == 5
     assert result.finished_at != ""

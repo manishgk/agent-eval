@@ -51,6 +51,18 @@ class CaseResult(BaseModel):
     flaky: bool
     pass_hat_k: dict[int, float] = Field(default_factory=dict)
 
+    @property
+    def status(self) -> str:
+        """Stability class: ``"pass"`` (all reps pass), ``"fail"`` (all fail), or
+        ``"flaky"`` (mixed). Derived from integer rep counts so renderers never
+        test the float ``reliability`` for equality (avoids float-equality bugs).
+        """
+        if self.n > 0 and self.successes == self.n:
+            return "pass"
+        if self.successes == 0:
+            return "fail"
+        return "flaky"
+
     @classmethod
     def from_reps(
         cls,
