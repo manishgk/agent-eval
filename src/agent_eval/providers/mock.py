@@ -42,11 +42,16 @@ def _find_city(prompt: str) -> str | None:
 class MockProvider:
     """Implements the LLMProvider protocol with scripted, optionally flaky logic."""
 
-    def __init__(self, *, model: str = "mock-agent", flakiness: float = 0.25, seed: int = 7) -> None:
+    def __init__(
+        self, *, model: str = "mock-agent", flakiness: float = 0.25, seed: int = 7
+    ) -> None:
         self.model = model
         self.flakiness = flakiness
         self._rng = random.Random(seed)
 
+    # system/tools/temperature are part of the LLMProvider protocol signature
+    # but this mock routes purely on prompt keywords.
+    # pylint: disable=unused-argument
     async def complete_with_tools(
         self,
         *,
@@ -55,6 +60,7 @@ class MockProvider:
         tools: list[dict[str, object]],
         temperature: float,
     ) -> ProviderResponse:
+        """Route the prompt to a tool by keyword, with scripted flakiness."""
         p = prompt.lower()
         cities = _find_cities(prompt)
         city = cities[0] if cities else None
@@ -87,7 +93,9 @@ class MockProvider:
         )
 
     @staticmethod
-    def _build(tool: str | None, city: str | None, cities: list[str] | None = None) -> ToolCall | None:
+    def _build(
+        tool: str | None, city: str | None, cities: list[str] | None = None
+    ) -> ToolCall | None:
         if tool is None:
             return None
         cities = cities or ([city] if city else [])

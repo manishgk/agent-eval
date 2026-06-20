@@ -1,3 +1,5 @@
+"""Tests for the reliability statistics (eval/stats.py)."""
+
 import math
 
 import pytest
@@ -5,12 +7,17 @@ import pytest
 from agent_eval.eval import stats
 
 
-def test_reliability() -> None:
-    assert stats.reliability(8, 10) == pytest.approx(0.8)
-    assert stats.reliability(0, 0) == 0.0
+@pytest.mark.parametrize(
+    ("successes", "n", "expected"),
+    [(8, 10, 0.8), (0, 0, 0.0)],
+)
+def test_reliability(successes: int, n: int, expected: float) -> None:
+    """reliability() is successes/n, and 0.0 when n is 0."""
+    assert stats.reliability(successes, n) == pytest.approx(expected)
 
 
 def test_wilson_interval_brackets_estimate() -> None:
+    """The Wilson interval contains the point estimate."""
     low, high = stats.wilson_interval(8, 10, 0.95)
     assert low == pytest.approx(0.490, abs=0.01)
     assert high == pytest.approx(0.943, abs=0.01)
@@ -18,32 +25,44 @@ def test_wilson_interval_brackets_estimate() -> None:
 
 
 def test_wilson_interval_at_100pct_is_not_certain() -> None:
-    # The headline talking point: 10/10 passes is NOT proof of 100% reliability.
+    """10/10 passes still leaves a wide lower bound, not certainty."""
     low, high = stats.wilson_interval(10, 10, 0.95)
     assert high == pytest.approx(1.0)
-    assert low < 0.9  # ~0.72 — wide uncertainty at small N
+    assert low < 0.9
 
 
 def test_wilson_interval_empty() -> None:
+    """n=0 returns a degenerate (0.0, 0.0) interval."""
     assert stats.wilson_interval(0, 0) == (0.0, 0.0)
 
 
-def test_flake_rate() -> None:
-    assert stats.flake_rate(10, 10) == 0.0
-    assert stats.flake_rate(8, 10) == pytest.approx(0.2)
-    assert stats.flake_rate(5, 10) == pytest.approx(0.5)
-    assert stats.flake_rate(0, 0) == 0.0
+@pytest.mark.parametrize(
+    ("successes", "n", "expected"),
+    [(10, 10, 0.0), (8, 10, 0.2), (5, 10, 0.5), (0, 0, 0.0)],
+)
+def test_flake_rate(successes: int, n: int, expected: float) -> None:
+    """flake_rate() is the minority fraction, 0 when all reps agree."""
+    assert stats.flake_rate(successes, n) == pytest.approx(expected)
 
 
-def test_is_flaky() -> None:
-    assert stats.is_flaky(7, 10) is True
-    assert stats.is_flaky(10, 10) is False
-    assert stats.is_flaky(0, 10) is False
+@pytest.mark.parametrize(
+    ("successes", "n", "expected"),
+    [(7, 10, True), (10, 10, False), (0, 10, False)],
+)
+def test_is_flaky(successes: int, n: int, expected: bool) -> None:
+    """is_flaky() is true only when reps disagree."""
+    assert stats.is_flaky(successes, n) is expected
 
 
-def test_pass_hat_k() -> None:
-    assert stats.pass_hat_k(8, 10, 1) == pytest.approx(0.8)
-    assert stats.pass_hat_k(10, 10, 5) == pytest.approx(1.0)
-    assert stats.pass_hat_k(3, 10, 5) == 0.0  # can't draw 5 passes from 3
-    assert stats.pass_hat_k(8, 10, 3) == pytest.approx(56 / 120)
-    assert math.isnan(stats.pass_hat_k(5, 3, 4))  # k > n
+@pytest.mark.parametrize(
+    ("successes", "n", "k", "expected"),
+    [(8, 10, 1, 0.8), (10, 10, 5, 1.0), (3, 10, 5, 0.0), (8, 10, 3, 56 / 120)],
+)
+def test_pass_hat_k(successes: int, n: int, k: int, expected: float) -> None:
+    """pass_hat_k() matches the hypergeometric probability of k passes."""
+    assert stats.pass_hat_k(successes, n, k) == pytest.approx(expected)
+
+
+def test_pass_hat_k_nan_when_k_exceeds_n() -> None:
+    """pass_hat_k() is NaN when k exceeds the number of reps."""
+    assert math.isnan(stats.pass_hat_k(5, 3, 4))

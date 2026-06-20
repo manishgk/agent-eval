@@ -30,6 +30,8 @@ pytest-asyncio = "^0.23"
 ruff = "^0.5"
 mypy = "^1.10"
 types-PyYAML = "^6.0"
+pylint = "^4.0"
+pylint-pydantic = "^0.4"
 
 [tool.poetry.scripts]
 agent-eval = "agent_eval.cli:main"
@@ -55,3 +57,19 @@ packages = ["agent_eval"]
 mypy_path = "src"
 strict = true
 ignore_missing_imports = true
+
+[tool.pylint.main]
+load-plugins = ["pylint_pydantic"]
+
+[tool.pylint.design]
+# Provider/judge/agent classes deliberately expose one public method to satisfy
+# the LLMProvider protocol (see providers/base.py) - that's the architecture,
+# not a smell.
+disable = ["too-few-public-methods"]
+# The runner/result builders take several independent keyword-only config
+# values (reps, concurrency, judge, confidence, ...); splitting them into a
+# parameter object would add indirection without making the call sites clearer.
+max-args = 7
+# render_svg builds one self-contained SVG document linearly; the local
+# variables are draw coordinates/colors, not state worth extracting.
+max-locals = 25

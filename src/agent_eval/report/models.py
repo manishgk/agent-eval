@@ -13,6 +13,8 @@ from agent_eval.eval import stats
 
 
 class JudgeVerdict(BaseModel):
+    """Structured grade returned by the LLM judge for one run."""
+
     passed: bool
     score: float  # 0.0 - 1.0
     reasoning: str
@@ -63,6 +65,7 @@ class CaseResult(BaseModel):
         confidence: float = 0.95,
         ks: tuple[int, ...] = (1, 3, 5),
     ) -> CaseResult:
+        """Aggregate a list of repetitions into reliability metrics."""
         n = len(reps)
         successes = sum(1 for r in reps if r.passed)
         low, high = stats.wilson_interval(successes, n, confidence)
@@ -85,6 +88,8 @@ class CaseResult(BaseModel):
 
 
 class SuiteResult(BaseModel):
+    """Aggregated reliability results for every case in a suite."""
+
     suite_name: str
     model: str
     temperature: float
@@ -96,12 +101,15 @@ class SuiteResult(BaseModel):
 
     @property
     def mean_reliability(self) -> float:
+        """Average reliability across all cases."""
         return sum(c.reliability for c in self.cases) / len(self.cases) if self.cases else 0.0
 
     @property
     def flaky_cases(self) -> list[CaseResult]:
+        """Cases flagged as flaky."""
         return [c for c in self.cases if c.flaky]
 
     @property
     def total_reps(self) -> int:
+        """Total repetitions run across all cases."""
         return sum(c.n for c in self.cases)

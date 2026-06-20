@@ -16,7 +16,7 @@ from agent_eval.report.models import SuiteResult
 
 def _list_runs() -> list[Path]:
     return sorted(
-        Path(__file__).resolve().parent.parent / "results".glob("*.json"),
+        (Path(__file__).resolve().parent.parent / "results").glob("*.json"),
         key=lambda p: p.stat().st_mtime,
         reverse=True,
     )
@@ -24,10 +24,12 @@ def _list_runs() -> list[Path]:
 
 @st.cache_data(show_spinner=False)
 def _load(path_str: str) -> dict:
-    return SuiteResult.model_validate_json(Path(path_str).read_text()).model_dump()
+    text = Path(path_str).read_text(encoding="utf-8")
+    return SuiteResult.model_validate_json(text).model_dump()
 
 
 def main() -> None:
+    """Render the Streamlit dashboard for the selected run."""
     st.set_page_config(page_title="agent-eval", layout="wide")
     st.title("🎯 agent-eval — tool-calling reliability")
     runs = _list_runs()
@@ -60,12 +62,12 @@ def main() -> None:
             )
             for c in cases
         ],
-        error_y=dict(
-            type="data",
-            symmetric=False,
-            array=[(c.wilson_high - c.reliability) * 100 for c in cases],
-            arrayminus=[(c.reliability - c.wilson_low) * 100 for c in cases],
-        ),
+        error_y={
+            "type": "data",
+            "symmetric": False,
+            "array": [(c.wilson_high - c.reliability) * 100 for c in cases],
+            "arrayminus": [(c.reliability - c.wilson_low) * 100 for c in cases],
+        },
         name="reliability",
     )
     fig.update_layout(

@@ -50,6 +50,7 @@ def _x(frac: float, bar_w: float) -> float:
 
 
 def render_svg(suite: SuiteResult) -> str:
+    """Render a SuiteResult as a self-contained reliability bar-chart SVG."""
     # Flaky cases first, then by ascending reliability — puts the interesting
     # (least reliable / widest-interval) rows at the top where the eye lands.
     cases = sorted(suite.cases, key=lambda c: (not c.flaky, c.reliability))

@@ -13,6 +13,8 @@ from pydantic import BaseModel, Field
 
 
 class Tool(BaseModel):
+    """A tool specification: name, description, and JSON Schema for its arguments."""
+
     name: str
     description: str
     input_schema: dict[str, Any] = Field(default_factory=dict)

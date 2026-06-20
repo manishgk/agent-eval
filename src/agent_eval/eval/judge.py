@@ -63,6 +63,8 @@ def _format_action(run: AgentRun) -> str:
 
 
 class LLMJudge:
+    """Grades an agent run against a case's rubric using a Claude model as judge."""
+
     def __init__(self, *, model: str = DEFAULT_JUDGE_MODEL, api_key: str | None = None) -> None:
         self.model = model
         self._client = AsyncAnthropic(api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"))
@@ -74,6 +76,7 @@ class LLMJudge:
         reraise=True,
     )
     async def grade(self, case: EvalCase, run: AgentRun) -> JudgeVerdict:
+        """Ask the judge model to grade `run` against the case's rubric."""
         rubric = case.judge_rubric or "The action should reasonably satisfy the user's request."
         prompt = (
             f"User request:\n{case.prompt}\n\n"

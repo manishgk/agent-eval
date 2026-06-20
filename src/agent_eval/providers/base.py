@@ -31,6 +31,7 @@ class ProviderResponse(BaseModel):
 
     @property
     def first_tool_call(self) -> ToolCall | None:
+        """The first tool call in the response, if any."""
         return self.tool_calls[0] if self.tool_calls else None
 
 
@@ -49,4 +50,3 @@ class LLMProvider(Protocol):
         temperature: float,
     ) -> ProviderResponse:
         """Send one user prompt with the given tool specs and return the response."""
-        ...

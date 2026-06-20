@@ -7,7 +7,7 @@ import time
 from typing import Any
 
 from anthropic import AsyncAnthropic
-from anthropic import APIError, APIStatusError, RateLimitError
+from anthropic import APIStatusError, RateLimitError
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -61,6 +61,7 @@ class AnthropicProvider:
         tools: list[dict[str, Any]],
         temperature: float,
     ) -> ProviderResponse:
+        """Call the Anthropic Messages API and normalize the response."""
         start = time.perf_counter()
         kwargs: dict[str, Any] = {
             "model": self.model,
@@ -71,11 +72,9 @@ class AnthropicProvider:
         }
         if _supports_temperature(self.model):
             kwargs["temperature"] = temperature
-        try:
-            message = await self._client.messages.create(**kwargs)  # type: ignore[arg-type]
-        except APIError:
-            # Let tenacity decide whether to retry; non-retryable errors propagate.
-            raise
+        # Errors propagate as-is; the @retry decorator above decides whether to
+        # retry (RateLimitError/APIStatusError) or let them surface.
+        message = await self._client.messages.create(**kwargs)  # type: ignore[arg-type]
 
         latency_ms = (time.perf_counter() - start) * 1000.0
 

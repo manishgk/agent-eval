@@ -31,11 +31,14 @@ class EvalCase(BaseModel):
 
 
 class EvalSuite(BaseModel):
+    """A named collection of eval cases, typically loaded from a YAML file."""
+
     name: str
     description: str | None = None
     cases: list[EvalCase]
 
 
 def load_suite(path: str | Path) -> EvalSuite:
-    data = yaml.safe_load(Path(path).read_text())
+    """Load an EvalSuite from a YAML file."""
+    data = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     return EvalSuite.model_validate(data)

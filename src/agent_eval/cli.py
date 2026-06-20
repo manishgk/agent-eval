@@ -108,6 +108,7 @@ def _run(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """CLI entry point; returns the process exit code."""
     args = _build_parser().parse_args(argv)
     if args.command == "run":
         return _run(args)

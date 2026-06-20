@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def main() -> None:
+    """Write the EvalSuite JSON Schema to evalsets/schema/."""
     schema_dir = ROOT / "evalsets" / "schema"
     schema_dir.mkdir(exist_ok=True)
     schema_path = schema_dir / "eval_suite.schema.json"

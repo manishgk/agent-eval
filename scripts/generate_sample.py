@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def main() -> None:
+    """Run the demo suite against the mock provider and write sample artifacts."""
     result = run_suite_sync(
         ToolAgent(MockProvider(flakiness=0.3)),
         load_suite(ROOT / "evalsets" / "tool_calling.yaml"),

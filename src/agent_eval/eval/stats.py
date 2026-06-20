@@ -21,6 +21,7 @@ from scipy.stats import norm
 
 
 def reliability(successes: int, n: int) -> float:
+    """Observed success rate: successes / n."""
     return successes / n if n else 0.0
 
 
@@ -48,6 +49,7 @@ def flake_rate(successes: int, n: int) -> float:
 
 
 def is_flaky(successes: int, n: int) -> bool:
+    """True when reps disagree (neither all-pass nor all-fail)."""
     return 0 < successes < n
 
 

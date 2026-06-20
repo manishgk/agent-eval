@@ -59,6 +59,8 @@ async def run_case(
     judge: LLMJudge | None = None,
     confidence: float = 0.95,
 ) -> CaseResult:
+    """Run one case `reps` times against the agent and aggregate the results."""
+
     async def one(index: int) -> RepResult:
         async with semaphore:
             run = await agent.run(case.prompt)
@@ -85,6 +87,7 @@ async def run_suite(
     confidence: float = 0.95,
     progress: ProgressCallback | None = None,
 ) -> SuiteResult:
+    """Run every case in the suite and aggregate into a SuiteResult."""
     semaphore = asyncio.Semaphore(concurrency)
     result = SuiteResult(
         suite_name=suite.name,

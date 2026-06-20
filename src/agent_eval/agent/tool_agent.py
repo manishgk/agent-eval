@@ -36,10 +36,13 @@ class AgentRun(BaseModel):
 
     @property
     def first_tool_call(self) -> ToolCall | None:
+        """The first tool call in the run, if any."""
         return self.tool_calls[0] if self.tool_calls else None
 
 
 class ToolAgent:
+    """Wraps an LLMProvider with a fixed tool registry, system prompt, and temperature."""
+
     def __init__(
         self,
         provider: LLMProvider,
@@ -63,7 +66,7 @@ class ToolAgent:
                 tools=to_anthropic_tools(self.tools),
                 temperature=self.temperature,
             )
-        except Exception as exc:  # noqa: BLE001 - surfaced as a failed rep
+        except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-exception-caught
             return AgentRun(
                 prompt=prompt,
                 model=self.provider.model,
