@@ -32,6 +32,7 @@ mypy = "^1.10"
 types-PyYAML = "^6.0"
 pylint = "^4.0"
 pylint-pydantic = "^0.4"
+pytest-cov = "^7.1.0"
 
 [tool.poetry.scripts]
 agent-eval = "agent_eval.cli:main"
@@ -43,6 +44,11 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+addopts = "--cov=agent_eval --cov-report=term-missing --cov-fail-under=80"
+
+[tool.coverage.run]
+source = ["agent_eval"]
+branch = true
 
 [tool.ruff]
 line-length = 100

@@ -71,6 +71,20 @@ def make_run() -> Callable[[str | None, dict[str, Any] | None], AgentRun]:
             "get_weather", None, False,
             id="expected_no_tool_but_tool_called",
         ),
+        pytest.param(
+            {
+                "expected_tool": "get_weather",
+                "expected_args": {"city": "Chicago"},
+                "case_insensitive": False,
+            },
+            "get_weather", {"city": "chicago"}, False,
+            id="case_sensitive_mismatch_fails",
+        ),
+        pytest.param(
+            {"expected_tool": "get_weather", "expected_args": {"units": "F"}},
+            "get_weather", {"city": "Chicago"}, False,
+            id="expected_key_missing_from_actual_args",
+        ),
     ],
 )
 def test_tool_call_matches(
