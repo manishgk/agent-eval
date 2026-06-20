@@ -4,8 +4,10 @@ poetry run python scripts/export_schema.py
 """
 
 from __future__ import annotations
+
 import json
 from pathlib import Path
+
 from agent_eval.eval.case import EvalSuite
 
 ROOT = Path(__file__).resolve().parent.parent

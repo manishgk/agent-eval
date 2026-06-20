@@ -58,8 +58,7 @@ def pass_hat_k(successes: int, n: int, k: int) -> float:
     replacement from the n observed reps. Returns 0.0 when k > successes and
     1.0 when every rep passed."""
     if k <= 0 or k > n:
-        return float("nan")
+        return math.nan
     if successes < k:
         return 0.0
-    # C(successes, k) / C(n, k)
     return math.comb(successes, k) / math.comb(n, k)

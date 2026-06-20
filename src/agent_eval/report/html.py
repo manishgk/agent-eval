@@ -113,6 +113,4 @@ _TEMPLATE = """<!doctype html>
 
 def render_html(suite: SuiteResult) -> str:
     """Render a SuiteResult as a self-contained HTML report."""
-    env = Environment(autoescape=True)
-    template = env.from_string(_TEMPLATE)
-    return template.render(s=suite)
+    return Environment(autoescape=True).from_string(_TEMPLATE).render(s=suite)

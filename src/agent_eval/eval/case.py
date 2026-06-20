@@ -18,14 +18,10 @@ class EvalCase(BaseModel):
 
     id: str
     prompt: str
-    # Expected behavior. expected_tool=None means "no tool should be called".
     expected_tool: str | None = None
     expected_args: dict[str, Any] = Field(default_factory=dict)
     arg_match: Literal["subset", "exact"] = "subset"
-    # Case-insensitive comparison for string argument values.
     case_insensitive: bool = True
-    # When set, an LLM judge also grades the run against this rubric. Useful for
-    # ambiguous prompts where exact-match is too strict.
     judge_rubric: str | None = None
     description: str | None = None
 
@@ -40,5 +36,4 @@ class EvalSuite(BaseModel):
 
 def load_suite(path: str | Path) -> EvalSuite:
     """Load an EvalSuite from a YAML file."""
-    data = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
-    return EvalSuite.model_validate(data)
+    return EvalSuite.model_validate(yaml.safe_load(Path(path).read_text(encoding="utf-8")))

@@ -56,7 +56,6 @@ def render_svg(suite: SuiteResult) -> str:
     cases = sorted(suite.cases, key=lambda c: (not c.flaky, c.reliability))
     bar_w = _W - _BAR_X - _PAD - _VALUE_W
     height = _HEADER_H + _ROW_H * len(cases) + _FOOTER_H + _PAD
-
     parts: list[str] = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{_W}" height="{height}" '
         f'viewBox="0 0 {_W} {height}" font-family="-apple-system,Segoe UI,Roboto,sans-serif">',
@@ -93,13 +92,11 @@ def render_svg(suite: SuiteResult) -> str:
             f'<text x="{gx:.1f}" y="{plot_bottom + 16}" fill="{_MUTED}" font-size="10" '
             f'text-anchor="middle">{int(frac * 100)}%</text>'
         )
-
     # --- Rows ---------------------------------------------------------------
     for i, c in enumerate(cases):
         row_y = _HEADER_H + i * _ROW_H
         cy = row_y + _ROW_H / 2
         color = _bar_color(c)
-
         # case-id label (left gutter)
         parts.append(
             f'<text x="{_PAD}" y="{cy - 2:.1f}" fill="{_FG}" font-size="12" '
@@ -110,7 +107,6 @@ def render_svg(suite: SuiteResult) -> str:
         parts.append(
             f'<text x="{_PAD}" y="{cy + 11:.1f}" fill="{_MUTED}" font-size="9">{flake_txt}</text>'
         )
-
         # track + reliability fill
         parts.append(
             f'<rect x="{_BAR_X}" y="{cy - 8:.1f}" width="{bar_w:.1f}" height="16" rx="4" '
@@ -121,7 +117,6 @@ def render_svg(suite: SuiteResult) -> str:
             f'<rect x="{_BAR_X}" y="{cy - 8:.1f}" width="{fill_w:.1f}" height="16" rx="4" '
             f'fill="{color}"/>'
         )
-
         # Wilson CI whisker
         lo_x = _x(c.wilson_low, bar_w)
         hi_x = _x(c.wilson_high, bar_w)
@@ -134,7 +129,6 @@ def render_svg(suite: SuiteResult) -> str:
                 f'<line x1="{wx:.1f}" y1="{cy - 5:.1f}" x2="{wx:.1f}" y2="{cy + 5:.1f}" '
                 f'stroke="{_FG}" stroke-width="2" opacity="0.85"/>'
             )
-
         # reliability % + CI range text, in the reserved right gutter
         gutter_x = _BAR_X + bar_w + 12
         parts.append(
@@ -145,7 +139,6 @@ def render_svg(suite: SuiteResult) -> str:
             f'<text x="{gutter_x:.1f}" y="{cy + 11:.1f}" fill="{_MUTED}" font-size="9">'
             f"[{c.wilson_low * 100:.0f}–{c.wilson_high * 100:.0f}%]</text>"
         )
-
     # --- Footer / legend ----------------------------------------------------
     legend_y = plot_bottom + _FOOTER_H
     parts.append(
@@ -153,6 +146,5 @@ def render_svg(suite: SuiteResult) -> str:
         f"bar = observed reliability · whisker = Wilson 95% CI · "
         f"green stable · amber flaky · red failing</text>"
     )
-
     parts.append("</svg>")
     return "\n".join(parts)

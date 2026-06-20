@@ -21,7 +21,7 @@ def _normalize(value: Any, case_insensitive: bool) -> Any:
 
 def _args_match(case: EvalCase, actual: dict[str, Any]) -> bool:
     expected = case.expected_args
-    if case.arg_match == "exact" and set(expected.keys()) != set(actual.keys()):
+    if case.arg_match == "exact" and expected.keys() != actual.keys():
         return False
     for key, exp_val in expected.items():
         if key not in actual:

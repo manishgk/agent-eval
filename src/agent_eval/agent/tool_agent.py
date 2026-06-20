@@ -7,18 +7,20 @@ reliability, not to be a feature-rich agent.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from textwrap import dedent
 
 from pydantic import BaseModel, Field
 
 from agent_eval.providers.base import LLMProvider, ToolCall
 from agent_eval.tools.registry import DEFAULT_TOOLS, Tool, to_anthropic_tools
 
-DEFAULT_SYSTEM_PROMPT = (
-    "You are a travel assistant. Use the provided tools to act on the user's "
-    "request. Call exactly one tool that best satisfies the request. If no tool "
-    "fits, respond in plain text without calling a tool."
-)
+DEFAULT_SYSTEM_PROMPT = dedent("""\
+    You are a travel assistant. Use the provided tools to act on the user's
+    request. Call exactly one tool that best satisfies the request. If no tool
+    fits, respond in plain text without calling a tool.
+    """).strip()
 
 
 class AgentRun(BaseModel):
@@ -32,7 +34,7 @@ class AgentRun(BaseModel):
     stop_reason: str | None = None
     latency_ms: float | None = None
     error: str | None = None
-    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     @property
     def first_tool_call(self) -> ToolCall | None:
@@ -40,21 +42,14 @@ class AgentRun(BaseModel):
         return self.tool_calls[0] if self.tool_calls else None
 
 
+@dataclass
 class ToolAgent:
     """Wraps an LLMProvider with a fixed tool registry, system prompt, and temperature."""
 
-    def __init__(
-        self,
-        provider: LLMProvider,
-        *,
-        tools: list[Tool] | None = None,
-        system_prompt: str = DEFAULT_SYSTEM_PROMPT,
-        temperature: float = 1.0,
-    ) -> None:
-        self.provider = provider
-        self.tools = tools if tools is not None else DEFAULT_TOOLS
-        self.system_prompt = system_prompt
-        self.temperature = temperature
+    provider: LLMProvider
+    tools: list[Tool] = field(default_factory=lambda: DEFAULT_TOOLS, kw_only=True)
+    system_prompt: str = field(default=DEFAULT_SYSTEM_PROMPT, kw_only=True)
+    temperature: float = field(default=1.0, kw_only=True)
 
     async def run(self, prompt: str) -> AgentRun:
         """Execute once. Any provider error is captured (not raised) so a single
@@ -73,7 +68,6 @@ class ToolAgent:
                 temperature=self.temperature,
                 error=f"{type(exc).__name__}: {exc}",
             )
-
         return AgentRun(
             prompt=prompt,
             model=resp.model,

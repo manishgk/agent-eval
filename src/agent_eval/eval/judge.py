@@ -12,8 +12,7 @@ import json
 import os
 from typing import Any
 
-from anthropic import AsyncAnthropic
-from anthropic import APIStatusError, RateLimitError
+from anthropic import APIStatusError, AsyncAnthropic, RateLimitError
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -83,9 +82,6 @@ class LLMJudge:
             f"Rubric:\n{rubric}\n\n"
             f"Agent action:\n{_format_action(run)}"
         )
-        # No `temperature`: the default judge model (Opus 4.8) removed sampling
-        # params and 400s if they're sent. Forced tool_choice keeps the verdict
-        # structured; grading consistency comes from a fixed rubric + schema.
         message = await self._client.messages.create(
             model=self.model,
             max_tokens=512,
@@ -97,5 +93,4 @@ class LLMJudge:
         for block in message.content:
             if block.type == "tool_use" and block.name == "submit_verdict":
                 return JudgeVerdict.model_validate(block.input)
-        # Forced tool use should make this unreachable; fail closed if not.
         return JudgeVerdict(passed=False, score=0.0, reasoning="Judge returned no verdict.")

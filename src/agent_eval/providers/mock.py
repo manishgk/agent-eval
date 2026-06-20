@@ -34,11 +34,6 @@ def _find_cities(prompt: str) -> list[str]:
     return seen
 
 
-def _find_city(prompt: str) -> str | None:
-    cities = _find_cities(prompt)
-    return cities[0] if cities else None
-
-
 class MockProvider:
     """Implements the LLMProvider protocol with scripted, optionally flaky logic."""
 
@@ -49,8 +44,6 @@ class MockProvider:
         self.flakiness = flakiness
         self._rng = random.Random(seed)
 
-    # system/tools/temperature are part of the LLMProvider protocol signature
-    # but this mock routes purely on prompt keywords.
     # pylint: disable=unused-argument
     async def complete_with_tools(
         self,
@@ -64,10 +57,7 @@ class MockProvider:
         p = prompt.lower()
         cities = _find_cities(prompt)
         city = cities[0] if cities else None
-        ambiguous = any(w in p for w in ("plan", "thinking about", "what do you think"))
-
-        if ambiguous:
-            # Flaky: usually a sensible first step, sometimes a premature/odd one.
+        if any(w in p for w in ("plan", "thinking about", "what do you think")):
             if self._rng.random() < self.flakiness:
                 choice = self._rng.choice(["book_hotel", "send_email", None])
             else:
@@ -82,8 +72,7 @@ class MockProvider:
         elif "email" in p:
             call = self._build("send_email", city, cities)
         else:
-            call = None  # chit-chat: no tool
-
+            call = None
         return ProviderResponse(
             model=self.model,
             text="" if call else "You're welcome!",
@@ -100,18 +89,21 @@ class MockProvider:
             return None
         cities = cities or ([city] if city else [])
         args: dict[str, object] = {}
-        if tool == "get_weather":
-            args = {"city": city or "Chicago"}
-        elif tool == "search_flights":
-            # Two cities mentioned ("from X to Y") -> first is origin, second is
-            # destination, in prompt order. One city or none -> default origin.
-            if len(cities) >= 2:
-                origin, destination = cities[0], cities[1]
-            else:
-                origin, destination = "Chicago", (cities[0] if cities else "New York")
-            args = {"origin": origin, "destination": destination, "date": "2026-07-04"}
-        elif tool == "book_hotel":
-            args = {"city": city or "New York", "check_in": "2026-07-04", "check_out": "2026-07-06"}
-        elif tool == "send_email":
-            args = {"to": "john@example.com", "subject": "Trip", "body": "Confirmed."}
+        match tool:
+            case "get_weather":
+                args = {"city": city or "Chicago"}
+            case "search_flights":
+                if len(cities) >= 2:
+                    origin, destination = cities[0], cities[1]
+                else:
+                    origin, destination = "Chicago", (cities[0] if cities else "New York")
+                args = {"origin": origin, "destination": destination, "date": "2026-07-04"}
+            case "book_hotel":
+                args = {
+                    "city": city or "New York",
+                    "check_in": "2026-07-04",
+                    "check_out": "2026-07-06",
+                }
+            case "send_email":
+                args = {"to": "john@example.com", "subject": "Trip", "body": "Confirmed."}
         return ToolCall(name=tool, arguments=args)

@@ -4,8 +4,8 @@ from execution."""
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
+from typing import Any, Self
 
 from pydantic import BaseModel, Field
 
@@ -42,8 +42,6 @@ class CaseResult(BaseModel):
     expected_tool: str | None = None
     used_judge: bool = False
     reps: list[RepResult]
-
-    # Computed reliability metrics
     n: int
     successes: int
     reliability: float
@@ -64,7 +62,7 @@ class CaseResult(BaseModel):
         reps: list[RepResult],
         confidence: float = 0.95,
         ks: tuple[int, ...] = (1, 3, 5),
-    ) -> CaseResult:
+    ) -> Self:
         """Aggregate a list of repetitions into reliability metrics."""
         n = len(reps)
         successes = sum(1 for r in reps if r.passed)
@@ -95,7 +93,7 @@ class SuiteResult(BaseModel):
     temperature: float
     reps_per_case: int
     confidence: float = 0.95
-    started_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    started_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
     finished_at: str = ""
     cases: list[CaseResult] = Field(default_factory=list)
 

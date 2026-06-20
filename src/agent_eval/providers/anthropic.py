@@ -6,8 +6,7 @@ import os
 import time
 from typing import Any
 
-from anthropic import AsyncAnthropic
-from anthropic import APIStatusError, RateLimitError
+from anthropic import APIStatusError, AsyncAnthropic, RateLimitError
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -19,7 +18,6 @@ from agent_eval.providers.base import ProviderResponse, ToolCall
 
 DEFAULT_AGENT_MODEL = os.getenv("AGENT_EVAL_AGENT_MODEL", "claude-haiku-4-5-20251001")
 
-# Transient failures worth retrying; deterministic 4xx (e.g. bad request) are not.
 _RETRYABLE = (RateLimitError, APIStatusError)
 
 # Sampling params (temperature/top_p/top_k) are removed on Fable 5 and Opus 4.7+
@@ -74,24 +72,22 @@ class AnthropicProvider:
             kwargs["temperature"] = temperature
         # Errors propagate as-is; the @retry decorator above decides whether to
         # retry (RateLimitError/APIStatusError) or let them surface.
-        message = await self._client.messages.create(**kwargs)  # type: ignore[arg-type]
-
+        message = await self._client.messages.create(**kwargs)
         latency_ms = (time.perf_counter() - start) * 1000.0
-
         text_parts: list[str] = []
         tool_calls: list[ToolCall] = []
         for block in message.content:
-            if block.type == "text":
-                text_parts.append(block.text)
-            elif block.type == "tool_use":
-                tool_calls.append(
-                    ToolCall(
-                        name=block.name,
-                        arguments=dict(block.input or {}),  # type: ignore[arg-type]
-                        call_id=block.id,
+            match block.type:
+                case "text":
+                    text_parts.append(block.text)
+                case "tool_use":
+                    tool_calls.append(
+                        ToolCall(
+                            name=block.name,
+                            arguments=dict(block.input or {}),
+                            call_id=block.id,
+                        )
                     )
-                )
-
         return ProviderResponse(
             model=message.model,
             text="".join(text_parts),

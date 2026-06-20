@@ -6,11 +6,9 @@ every repetition, and aggregates into reliability statistics. This is where
 """
 
 from __future__ import annotations
-
 import asyncio
 from collections.abc import Callable
-from datetime import datetime, timezone
-
+from datetime import UTC, datetime
 from agent_eval.agent.tool_agent import AgentRun, ToolAgent
 from agent_eval.eval.assertions import tool_call_matches
 from agent_eval.eval.case import EvalCase, EvalSuite
@@ -28,14 +26,11 @@ async def _score_rep(
 ) -> RepResult:
     assertion_passed = tool_call_matches(case, run)
     verdict = None
-    # The judge is authoritative for cases that define a rubric (typically the
-    # ambiguous ones); otherwise the deterministic assertion decides.
     if judge is not None and case.judge_rubric:
         verdict = await judge.grade(case, run)
         passed = verdict.passed
     else:
         passed = assertion_passed
-
     call = run.first_tool_call
     return RepResult(
         index=index,
@@ -66,7 +61,9 @@ async def run_case(
             run = await agent.run(case.prompt)
         return await _score_rep(case, index, run, judge)
 
-    rep_results = await asyncio.gather(*(one(i) for i in range(reps)))
+    async with asyncio.TaskGroup() as tg:
+        tasks = [tg.create_task(one(i)) for i in range(reps)]
+    rep_results = [t.result() for t in tasks]
     return CaseResult.from_reps(
         case_id=case.id,
         prompt=case.prompt,
@@ -103,8 +100,7 @@ async def run_suite(
         result.cases.append(case_result)
         if progress is not None:
             progress(case.id, i, len(suite.cases))
-
-    result.finished_at = datetime.now(timezone.utc).isoformat()
+    result.finished_at = datetime.now(UTC).isoformat()
     return result
 
 

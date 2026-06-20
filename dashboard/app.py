@@ -8,9 +8,12 @@ and lets you drill into individual repetitions.
 """
 
 from __future__ import annotations
+
 from pathlib import Path
+
 import plotly.graph_objects as go
 import streamlit as st
+
 from agent_eval.report.models import SuiteResult
 
 

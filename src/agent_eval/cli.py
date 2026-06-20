@@ -15,6 +15,7 @@ from agent_eval.eval.case import load_suite
 from agent_eval.eval.judge import LLMJudge
 from agent_eval.eval.runner import run_suite_sync
 from agent_eval.providers.anthropic import AnthropicProvider
+from agent_eval.providers.base import LLMProvider
 from agent_eval.providers.mock import MockProvider
 from agent_eval.report.html import render_html
 from agent_eval.report.models import SuiteResult
@@ -26,7 +27,6 @@ console = Console()
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="agent-eval", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-
     run = sub.add_parser("run", help="Run a reliability eval suite.")
     run.add_argument("evalset", type=Path, help="Path to a YAML eval suite.")
     run.add_argument("--reps", type=int, default=20, help="Repetitions per case (default 20).")
@@ -72,16 +72,14 @@ def _print_table(result: SuiteResult) -> None:
 def _run(args: argparse.Namespace) -> int:
     load_dotenv()
     suite = load_suite(args.evalset)
-
+    provider: LLMProvider
     if args.mock:
         provider = MockProvider()
         judge = None  # judge needs a real model; mock runs are assertion-only
     else:
         provider = AnthropicProvider(model=args.model) if args.model else AnthropicProvider()
         judge = None if args.no_judge else LLMJudge()
-
     agent = ToolAgent(provider, temperature=args.temperature)
-
     with console.status(f"Running {len(suite.cases)} cases × {args.reps} reps…"):
         result = run_suite_sync(
             agent,
@@ -92,9 +90,7 @@ def _run(args: argparse.Namespace) -> int:
             confidence=args.confidence,
             progress=lambda cid, i, n: console.log(f"[{i}/{n}] {cid}"),
         )
-
     _print_table(result)
-
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(result.model_dump_json(indent=2))
     args.html.parent.mkdir(parents=True, exist_ok=True)
